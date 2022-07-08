@@ -31,10 +31,10 @@ a {
     text-decoration: none;
 }
 
-button {
-    /* border: none; */
-    /* background: none; */
-}
+/* button {
+    border: none;
+    background: none;
+} */
 
 input:focus,
 select:focus,
@@ -49,10 +49,19 @@ button:focus {
     gap: 1rem;
 }
 
+.filters{
+    display: flex;
+    justify-content: space-evenly;
+}
+
 .underline{
     text-decoration: underline;
 }
 
 .hidden {
     display: none;
+}
+
+.button{
+    text-align: center;
 }

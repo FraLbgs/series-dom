@@ -10,9 +10,11 @@ try {
         // Display
         displaySeries();
         displayStyles(getStyles(json));
+        displayCountries(getCoutries(json));
 
         // Event handlers
         manageClickStyles();
+        manageClickCountries();
         manageSeriesClick();
         manageFavClick();
         displayFavNumber();
@@ -20,6 +22,8 @@ try {
         sortSeriesFromAscYear();
         sortSeriesFromDescYear();
         cancelSortOnClick();
+
+
     }); 
 } catch (error) {
     console.error("error" + error);
@@ -80,7 +84,18 @@ function countSeriesFromStyle(style){
 // 7/ Créer une fonction qui retourne les ID des séries d'un style.
 
 function getIdFromStyle(style){
-    return series.filter(serie => serie.styles.includes(style)).map(serie => serie.id);
+    const res = [];
+    const li = document.querySelector("#countries > li.underline");
+    if(li === null) return series.filter(serie => serie.styles.includes(style)).map(serie => serie.id);
+    const country = li.dataset.country;
+    const idsCountryList = series.filter(serie => serie.country === country).map(serie => serie.id);
+    let idsStyle = series.filter(serie => serie.styles.includes(style)).map(serie => serie.id);
+    const concatTab = idsCountryList.concat(idsStyle);
+    concatTab.sort((a,b) => a-b);
+    for(let i=0; i< concatTab.length-1; i++){
+        if(concatTab[i+1]===concatTab[i]) res.push(concatTab[i]);
+    }
+    return res;
 }
 
 // 8/ Créer une fonction qui gère les clics sur les styles afin de les souligner lorsqu'ils sont cliqués.
@@ -266,9 +281,10 @@ function cancelSort(){
 // 26/ Créer une fonction qui permet de gérer au clic sur un lien la désactivation des filtres.
 
 function cancelSortOnClick(){
-    document.getElementById("cancelSort").addEventListener("click", function(e){
+    document.getElementById("cancel-sort").addEventListener("click", function(e){
         cancelSort();
         resetStyles();
+        resetCoutries();
         this.classList.add("hidden");
     });
 }
@@ -276,9 +292,99 @@ function cancelSortOnClick(){
 // 27/ Créer une fonction qui gère l'affichage de ce lien de désactivation des filtres uniquement quand un filtre est activé.
 
 function displayCancelFilterButton(){
-    document.getElementById("cancelSort").classList.remove("hidden");
+    document.getElementById("cancel-sort").classList.remove("hidden");
 }
 
 // 28/ Créer l'ensemble des fonctions permettant d'ajouter la fonctionnalité de filtrage par pays d'origine,
 //     en reprenant la logique des questions 3/ à 11/ sur le filtrage par style. 
 
+// 28.3/ Créer une fonction qui retourne la liste des pays d'origine des séries présents dans les données.
+
+function getCoutries() {
+    const array = []
+    series.forEach(serie => {
+        if(!array.includes(serie.country)) {
+            array.push(serie.country)
+        }
+    });
+    return array;
+}
+
+// 28.4/ Créer une fonction qui affiche la liste des pays des séries.
+function displayCountries(countries){
+    countries.forEach(country =>{
+        document.getElementById("countries").innerHTML+=`<li data-country="${country}">${country} (${countSeriesFromCountry(country)}) </li>`
+    })
+
+    // document.getElementById("countries").innerHTML = countries.map(country => `<li>${country}</li>`).join("")
+}
+
+// 28.5/ Créer une fonction qui compte le nombre de séries d'un pays.
+
+function countSeriesFromCountry(country){
+    let nbrSeries = 0;
+    series.forEach(serie => {
+        if(serie.country.includes(country)){
+            nbrSeries++;
+        }
+    });
+    return nbrSeries;
+
+    // return series.filter(serie => serie.country.includes(country)).length;
+}
+
+// 28.6/ Affichez dans la liste des pays le nombre de séries correspondantes entre parenthèse.
+//      Modifier la fonction de la question 4/
+
+// 28.7/ Créer une fonction qui retourne les ID des séries d'un pays.
+
+function getIdFromCountry(country){
+    const res = [];
+    const li = document.querySelector("#styles > li.underline");
+    if(li === null) return series.filter(serie => serie.country === country).map(serie => serie.id);
+    const style = li.dataset.style;
+    const idsStyleList = series.filter(serie => serie.styles.includes(style)).map(serie => serie.id);
+    let idsCountry = series.filter(serie => serie.country === country).map(serie => serie.id);
+    const concatTab = idsStyleList.concat(idsCountry);
+    concatTab.sort((a,b) => a-b);
+    for(let i=0; i< concatTab.length-1; i++){
+        if(concatTab[i+1]===concatTab[i]) res.push(concatTab[i]);
+    }
+    return res;
+}
+
+// 28.8/ Créer une fonction qui gère les clics sur les pays afin de les souligner lorsqu'ils sont cliqués.
+
+function manageClickCountries(){
+    document.querySelectorAll("#countries > li").forEach(li =>{
+        li.addEventListener("click", function(event){
+            filterCountry(this.dataset.country);
+            resetCoutries();
+            this.classList.add("underline");
+            displayCancelFilterButton();
+        })
+    });
+}
+
+// 28.9/ Créer une fonction pour retirer le soulignement de tous les styles.
+//      Utiliser cette fonction pour qu'à la question 8/ seul le dernier style cliqué soit souligné.
+
+function resetCoutries(){
+    document.querySelectorAll("#countries > li").forEach(li =>{
+        li.classList.remove("underline");
+    });    
+}
+
+// 28.10/ Créer une fonction qui affiche dans la page uniquement les séries dont les id sont en paramètre.
+// function displaySeriesById(array){
+//     document.querySelectorAll("#container > li").forEach(li =>{
+//         if (array.includes(parseInt(li.dataset.id))) li.classList.remove("hidden");
+//         else li.classList.add("hidden");
+//     });
+// } 
+
+// 11/ Modifier la fonction de la question 8/ afin de filtrer les séries au clic sur un style.
+
+function filterCountry(country) {
+    displaySeriesById(getIdFromCountry(country));
+}
