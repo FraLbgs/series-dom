@@ -8,7 +8,7 @@ try {
         series = json;
 
         // Display
-        displaySeries(json);
+        displaySeries();
         displayStyles(getStyles(json));
 
         // Event handlers
@@ -16,6 +16,10 @@ try {
         manageSeriesClick();
         manageFavClick();
         displayFavNumber();
+        getIdsSortByLaunchYear();
+        sortSeriesFromAscYear();
+        sortSeriesFromDescYear();
+        cancelSortOnClick();
     }); 
 } catch (error) {
     console.error("error" + error);
@@ -84,9 +88,10 @@ function getIdFromStyle(style){
 function manageClickStyles(){
     document.querySelectorAll("#styles > li").forEach(li =>{
         li.addEventListener("click", function(event){
-            filterStyle(this.dataset.style)
-            resetStyles()
-            this.classList.add("underline")
+            filterStyle(this.dataset.style);
+            resetStyles();
+            this.classList.add("underline");
+            displayCancelFilterButton();
         })
     });
 }
@@ -95,22 +100,22 @@ function manageClickStyles(){
 //      Utiliser cette fonction pour qu'à la question 8/ seul le dernier style cliqué soit souligné.
 function resetStyles(){
     document.querySelectorAll("#styles > li").forEach(li =>{
-        li.classList.remove("underline")
+        li.classList.remove("underline");
     });    
 }
 
 // 10/ Créer une fonction qui affiche dans la page uniquement les séries dont les id sont en paramètre.
 function displaySeriesById(array){
     document.querySelectorAll("#container > li").forEach(li =>{
-        if (array.includes(parseInt(li.dataset.id))) li.classList.remove("hidden")
-        else li.classList.add("hidden")
+        if (array.includes(parseInt(li.dataset.id))) li.classList.remove("hidden");
+        else li.classList.add("hidden");
     });
 } 
 
 // 11/ Modifier la fonction de la question 8/ afin de filtrer les séries au clic sur un style.
 
 function filterStyle(style) {
-    displaySeriesById(getIdFromStyle(style))
+    displaySeriesById(getIdFromStyle(style));
 }
 
 // 12/ Créer une fonction qui retourne toutes les données d'une série à partir de son ID
@@ -142,7 +147,7 @@ function displayIdFromClick(){
 let favList = [];
 function addSerieToFav(serie){
    if (!favList.includes(serie)) {
-     favList.push(serie)
+     favList.push(serie);
    } 
    displayFavList();
    displayFavNumber();
@@ -153,7 +158,7 @@ function addSerieToFav(serie){
 function manageSeriesClick(){
     document.querySelectorAll("#container > li").forEach(li =>{
         li.addEventListener("click",function (event) {
-            addSerieToFav(getDataFromId(this.dataset.id))
+            addSerieToFav(getDataFromId(this.dataset.id));
         })
     })
 }
@@ -163,7 +168,7 @@ function manageSeriesClick(){
 function displayFavList(){
     let html = "";
     favList.forEach(serie => {
-       html += `<li data-id="${serie.id}">${serie.name}</li>` 
+       html += `<li data-id="${serie.id}">${serie.name}</li>` ;
     })
     document.getElementById("favoris").innerHTML = html;
 }
@@ -190,32 +195,90 @@ function manageFavClick() {
 // 20/ Créer une fonction qui affiche le nombre de favoris en titre de la liste des favoris.
 
 function displayFavNumber(){
-    const favNumber = document.getElementById("favoris").childElementCount;
-    console.log(favNumber);
+    const favNumber = favList.length; //document.getElementById("favoris").childElementCount;
     document.getElementById("fav-ttl").innerHTML = "Favoris ("+favNumber+")";
 }
 
 
 // 21/ Créer une fonction qui retourne les id des séries par ordre d'année de sortie.
 
+function getIdsSortByLaunchYear(){
+
+    const IdsFromLaunchYear = {};
+    for(const serie of series){
+        IdsFromLaunchYear[serie.id] = serie.launchYear;
+    }
+    const sortedIds = [];
+    const values = Object.values(IdsFromLaunchYear);
+    const sortedValues = values.sort((a,b) => a-b);
+    for(let i=0; i<values.length;i++){
+        for(const id in IdsFromLaunchYear){
+            if(sortedValues[i] === IdsFromLaunchYear[id] && sortedValues[i] !== sortedValues[i+1]){
+                sortedIds.push(id);
+            }
+        }
+    }
+    return sortedIds;
+}
+
 
 // 22/ Créer une fonction qui affiche les séries dans la page dans l'ordre des ids passés en paramètre.
+
+function displaySeriesFromIds(tab){
+    const seriesList = document.querySelectorAll("#container > li");
+    const element = document.getElementById("container");
+    for(const id of tab){
+        for(const li of seriesList){
+            if(li.dataset.id === id){
+                element.appendChild(li);
+            }
+        }
+    }
+}
 
 
 // 23/ Créer une fonction qui permet de gérer au clic sur un lien dans la page le tri des series par années croissantes
 
+function sortSeriesFromAscYear(){
+    document.getElementById("aSort").addEventListener("click", function(e){
+        displaySeriesFromIds(getIdsSortByLaunchYear());
+    });
+}
+
 
 // 24/ Permettez à la fonction précédente de gérer un click sur un autre lien pour trier les series par années décroissantes.
+
+function sortSeriesFromDescYear(){
+    document.getElementById("zSort").addEventListener("click", function(e){
+        displaySeriesFromIds(getIdsSortByLaunchYear().reverse());
+    });
+}
 
 
 // 25/ Créer une fonction qui désactive le filtre activé.
 
+function cancelSort(){
+    document.querySelectorAll("#container > li").forEach(li =>{
+        li.classList.remove("hidden")
+    });
+}
 
 // 26/ Créer une fonction qui permet de gérer au clic sur un lien la désactivation des filtres.
 
+function cancelSortOnClick(){
+    document.getElementById("cancelSort").addEventListener("click", function(e){
+        cancelSort();
+        resetStyles();
+        this.classList.add("hidden");
+    });
+}
 
 // 27/ Créer une fonction qui gère l'affichage de ce lien de désactivation des filtres uniquement quand un filtre est activé.
 
+function displayCancelFilterButton(){
+    document.getElementById("cancelSort").classList.remove("hidden");
+}
 
 // 28/ Créer l'ensemble des fonctions permettant d'ajouter la fonctionnalité de filtrage par pays d'origine,
 //     en reprenant la logique des questions 3/ à 11/ sur le filtrage par style. 
+
