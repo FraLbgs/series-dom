@@ -13,8 +13,9 @@ try {
 
         // Event handlers
         manageClickStyles();
-        manageSeriesClick()
-        manageFavClick()
+        manageSeriesClick();
+        manageFavClick();
+        displayFavNumber();
     }); 
 } catch (error) {
     console.error("error" + error);
@@ -144,6 +145,7 @@ function addSerieToFav(serie){
      favList.push(serie)
    } 
    displayFavList();
+   displayFavNumber();
 }
  
 // 16/ Créer une fonction pour ajouter une série en favoris au click.
@@ -177,12 +179,21 @@ function removeSerieFromFav(id) {
 
 function manageFavClick() {
     document.getElementById("favoris").addEventListener("click", function(event){
-        if(event.target.hasAttribute("data-id")) removeSerieFromFav(event.target.dataset.id);    
-    })
+        if(event.target.hasAttribute("data-id")){
+            removeSerieFromFav(event.target.dataset.id);
+            displayFavNumber();
+        }     
+    });
 }
 
 
 // 20/ Créer une fonction qui affiche le nombre de favoris en titre de la liste des favoris.
+
+function displayFavNumber(){
+    const favNumber = document.getElementById("favoris").childElementCount;
+    console.log(favNumber);
+    document.getElementById("fav-ttl").innerHTML = "Favoris ("+favNumber+")";
+}
 
 
 // 21/ Créer une fonction qui retourne les id des séries par ordre d'année de sortie.
